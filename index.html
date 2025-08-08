@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Archive of the Untamed</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      background-color: #000;
+      color: #00FF00;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 14px;
+    }
+    .light-mode {
+      background-color: #f4f4f4;
+      color: #111;
+    }
+    #terminal {
+      white-space: pre-wrap;
+      overflow-y: auto;
+      min-height: 80vh;
+    }
+    button, .toggle {
+      background: none;
+      color: inherit;
+      border: 1px solid #00FF00;
+      padding: 5px 10px;
+      font-family: monospace;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    #controls {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>> ARCHIVE OF THE UNTAMED</h1>
+<div id="terminal"></div>
+
+<div id="controls">
+  <button onclick="toggleTheme()">[ toggle dark/light ]</button>
+  <button onclick="toggleAudio()">[ mute / unmute ]</button>
+</div>
+
+<audio id="bg-audio" autoplay loop>
+  <source src="audio/soundscape.mp3" type="audio/mp3">
+  Your browser does not support the audio element.
+</audio>
+
+<script>
+  // Testo da scrivere nel terminale
+  const terminalText = `
+:: protocol://disorder.memory.network/init
+:: version 3.0
+
+> STATUS: ACTIVE [OK]
+> AUTHOR: Micol Gelsi
+> CURRENT_LOCATION: Rome (IT)
+
+> ACCESSING SYSTEM...
+
+> ABOUT:
+  Archive of the Untamed is an artistic research project exploring
+  urban wildness, collective memory, and performative archiving
+  as tools of resistance and reappropriation.
+
+> PLATFORM NODES:
+  - Abstract
+  - Manifesto
+  - Online Platform
+  - Hardware Treehouse
+  - Performative Logs
+  - Narrative Modes
+  - Editorial Dump
+
+> REPOSITORY: /archive-of-the-untamed/
+
+> END_OF_INDEX █`;
+
+  const terminal = document.getElementById("terminal");
+  let index = 0;
+
+  function typeWriter() {
+    if (index < terminalText.length) {
+      terminal.innerHTML += terminalText.charAt(index);
+      index++;
+      setTimeout(typeWriter, 10);
+    }
+  }
+  typeWriter();
+
+  function toggleTheme() {
+    document.body.classList.toggle("light-mode");
+  }
+
+  function toggleAudio() {
+    const audio = document.getElementById("bg-audio");
+    audio.muted = !audio.muted;
+  }
+</script>
+
+</body>
+</html>

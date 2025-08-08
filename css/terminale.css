@@ -1,0 +1,69 @@
+/* AOTU — Terminal Theme (shared by index.html & archive.html)
+   Keep CSS in /css/terminal.css and link with <link rel="stylesheet" href="css/terminal.css"> */
+
+:root{
+  --term-bg:#000;
+  --term-fg:#00FF00;
+  --term-muted:#66ff66;
+  --term-border:#00FF00;
+  --term-ui-bg:transparent;
+}
+body.light{
+  --term-bg:#f5fff5;
+  --term-fg:#003300;
+  --term-muted:#227a22;
+  --term-border:#227a22;
+  --term-ui-bg:#ffffff;
+}
+
+/* Base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background-color:var(--term-bg);color:var(--term-fg);font-family:"Courier New", Courier, monospace;font-size:14px;padding:24px}
+
+/* Header + title prefix */
+header{max-width:1100px;margin:0 auto 8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0 0 6px;font-size:20px;letter-spacing:.5px}
+h1::before{content:"> ";color:var(--term-muted)}
+.sub{color:var(--term-muted);margin:0 0 12px;flex-basis:100%}
+
+/* Toggle */
+.toggle{margin-left:auto;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--term-border);padding:4px 8px;background:var(--term-ui-bg)}
+.toggle button{background:transparent;border:1px solid var(--term-border);color:var(--term-fg);padding:2px 8px;cursor:pointer}
+
+/* Controls bar */
+.bar{display:grid;gap:8px;grid-template-columns:1fr;max-width:1100px;margin:0 auto 10px}
+@media(min-width:760px){.bar{grid-template-columns:220px 1fr 140px}}
+select,input,button{width:100%;padding:6px 10px;border-radius:0;border:1px solid var(--term-border);background:var(--term-ui-bg);color:var(--term-fg);font-family:inherit;font-size:14px;outline:none}
+
+/* Grid & cards */
+main{max-width:1100px;margin:0 auto}
+.grid{display:grid;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1000px){.grid{grid-template-columns:repeat(4,1fr)}}
+
+.card{position:relative;border:1px dashed var(--term-border);border-radius:0;overflow:hidden;background:var(--term-bg)}
+.card .ph{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--term-muted);background:var(--term-bg)}
+.card img{display:block;width:100%;height:auto;filter:saturate(0.9)}
+.meta{padding:8px 8px 10px;border-top:1px dashed var(--term-border)}
+.title{font-size:13px;margin:0 0 2px}
+.title::before{content:"> ";color:var(--term-muted)}
+.muted{color:var(--term-muted);font-size:12px}
+
+.empty,.loading,.error{padding:16px 4px;color:var(--term-muted);text-align:left;border:1px dashed var(--term-border);margin:8px 0}
+
+/* Lightbox */
+dialog#lb{border:1px solid var(--term-border);border-radius:0;padding:0;background:var(--term-bg);max-width:min(92vw,1100px);color:var(--term-fg)}
+#lb::backdrop{background:rgba(0,0,0,.85)}
+.lb-wrap{display:grid;grid-template-columns:1fr;gap:0}
+.lb-media{background:var(--term-bg);border-bottom:1px dashed var(--term-border)}
+.lb-media img,.lb-media video,.lb-media audio{width:100%;height:auto;display:block}
+.lb-meta{padding:12px}
+.lb-title{margin:0 0 6px;font-size:14px}
+.lb-title::before{content:"> ";color:var(--term-muted)}
+.chip{display:inline-block;padding:2px 6px;border:1px dashed var(--term-border);border-radius:0;font-size:12px;margin:0 6px 6px 0}
+.close{position:absolute;top:6px;right:6px;background:transparent;border:1px solid var(--term-border);border-radius:0;padding:4px 8px;color:var(--term-fg)}
+
+/* Utility */
+.container{max-width:1100px;margin:0 auto}
+.link{color:var(--term-fg);text-decoration:underline}

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AOTU — Archive</title>
+  <meta name="description" content="Archive of the Untamed — media archive (headless from WordPress)" />
+  <link rel="stylesheet" href="css/terminal.css">
+</head>
+<body>
+  <header>
+    <h1>Archive</h1>
+    <p class="sub">Headless from WordPress (REST API). Configure your WP base URL below.</p>
+  </header>
+
+  <section class="bar">
+    <select id="type">
+      <option value="">All types</option>
+      <option>image</option>
+      <option>video</option>
+      <option>audio</option>
+      <option>doc</option>
+    </select>
+    <input id="q" placeholder="Search title / notes / tags" />
+    <button id="refresh">Refresh</button>
+  </section>
+
+  <main>
+    <div id="state" class="loading">Loading…</div>
+    <div id="grid" class="grid" hidden></div>
+  </main>
+
+  <dialog id="lb"><button class="close" onclick="document.getElementById('lb').close()">Close</button>
+    <div class="lb-wrap">
+      <div class="lb-media" id="lbMedia"></div>
+      <div class="lb-meta">
+        <h3 class="lb-title" id="lbTitle"></h3>
+        <div class="muted" id="lbInfo"></div>
+        <div id="lbTags" style="margin-top:8px"></div>
+        <div id="lbNotes" style="margin-top:10px"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+  // ======= CONFIG =======
+  const WP_BASE = 'https://YOUR-WP-DOMAIN.TLD'; // <-- change this
+  // If you create a custom post type "aotu_item", set API paths here. For a quick MVP we pull from /media
+  const API_URL = WP_BASE + '/wp-json/wp/v2/media?per_page=100&_fields=id,source_url,media_type,alt_text,caption,media_details,date';
+
+  // Optional: If you use ACF for extra metadata on a custom endpoint, you can switch to that URL instead.
+  // const API_URL = WP_BASE + '/wp-json/wp/v2/aotu_item?per_page=100&_embed';
+
+  const els = {
+    grid: document.getElementById('grid'),
+    state: document.getElementById('state'),
+    type: document.getElementById('type'),
+    q: document.getElementById('q'),
+    refresh: document.getElementById('refresh'),
+    lb: document.getElementById('lb'),
+    lbMedia: document.getElementById('lbMedia'),
+    lbTitle: document.getElementById('lbTitle'),
+    lbInfo: document.getElementById('lbInfo'),
+    lbTags: document.getElementById('lbTags'),
+    lbNotes: document.getElementById('lbNotes'),
+  };
+
+  let DATA = [];
+
+  async function fetchData(){
+    els.state.textContent = 'Loading…';
+    els.state.hidden = false;
+    els.grid.hidden = true;
+    try{
+      const res = await fetch(API_URL, {mode:'cors'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const items = await res.json();
+      DATA = normalize(items);
+      render();
+    }catch(err){
+      console.error(err);
+      els.state.textContent = 'Error loading data. Check CORS and API URL.';
+    }
+  }
+
+  function normalize(items){
+    // Map WP media → common schema
+    return items.map(x => ({
+      id: x.id,
+      title: (x.alt_text || (x.caption && x.caption.rendered) || 'Untitled').toString().replace(/<[^>]+>/g,''),
+      type: mapType(x),
+      src: x.source_url,
+      thumb: thumbFromDetails(x),
+      date: x.date?.slice(0,10) || '',
+      tags: [], // If you have taxonomies via CPT, fill here when switching endpoint
+      notes: '', // e.g., from ACF
+      meta: x.media_details || {}
+    }));
+  }
+
+  function mapType(x){
+    if(x.media_type === 'image') return 'image';
+    if(x.media_type === 'file'){
+      // Guess by mime
+      const mime = x.media_details?.mime_type || '';
+      if(mime.startsWith('audio/')) return 'audio';
+      if(mime.startsWith('video/')) return 'video';
+      return 'doc';
+    }
+    return x.media_type || 'doc';
+  }
+
+  function thumbFromDetails(x){
+    const sizes = x.media_details?.sizes;
+    if(sizes){
+      const cand = sizes.thumbnail || sizes.medium || sizes.full;
+      if(cand?.source_url) return cand.source_url;
+    }
+    return x.source_url;
+  }
+
+  function render(){
+    const q = els.q.value.trim().toLowerCase();
+    const t = els.type.value;
+    const list = DATA.filter(it => (
+      (!t || it.type===t) &&
+      (!q || (it.title.toLowerCase().includes(q) || it.notes.toLowerCase().includes(q) || it.tags.join(' ').toLowerCase().includes(q)))
+    ));
+
+    els.grid.innerHTML = '';
+
+    if(list.length === 0){
+      els.state.textContent = 'No items match your filters.';
+      els.state.hidden = false;
+      els.grid.hidden = true;
+      return;
+    }
+
+    els.state.hidden = true;
+    els.grid.hidden = false;
+
+    list.forEach(it => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.innerHTML = `
+        <a href="#" data-id="${it.id}">
+          ${it.type==='image' ? `<img loading="lazy" src="${it.thumb}" alt="${escapeHtml(it.title)}" />` : `<div class="ph">${it.type.toUpperCase()}</div>`}
+          <div class="meta">
+            <h3 class="title">${escapeHtml(it.title)}</h3>
+            <div class="muted">${it.date || ''}</div>
+          </div>
+        </a>`;
+      card.querySelector('a').addEventListener('click', e => { e.preventDefault(); openLightbox(it); });
+      els.grid.appendChild(card);
+    });
+  }
+
+  function openLightbox(it){
+    els.lbTitle.textContent = it.title;
+    els.lbInfo.textContent = [it.type, it.date].filter(Boolean).join(' · ');
+    els.lbTags.innerHTML = it.tags.map(t => `<span class="chip">${escapeHtml(t)}</span>`).join('');
+    els.lbNotes.textContent = it.notes || '';
+    els.lbMedia.innerHTML = '';
+
+    const url = it.src;
+    if(it.type==='image'){
+      const img = new Image(); img.src = url; img.alt = it.title; els.lbMedia.appendChild(img);
+    } else if(it.type==='video'){
+      const v = document.createElement('video'); v.src=url; v.controls=true; els.lbMedia.appendChild(v);
+    } else if(it.type==='audio'){
+      const a = document.createElement('audio'); a.src=url; a.controls=true; els.lbMedia.appendChild(a);
+    } else {
+      const p = document.createElement('p'); p.innerHTML = `Document: <a href="${url}" target="_blank" rel="noopener">open</a>`; els.lbMedia.appendChild(p);
+    }
+
+    els.lb.showModal();
+    const id = new URLSearchParams(location.search); id.set('id', it.id); history.replaceState(null,'','?'+id.toString());
+  }
+
+  function escapeHtml(s){return s?.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])) || ''}
+
+  // Filters and events
+  els.type.addEventListener('change', render);
+  els.q.addEventListener('input', render);
+  els.refresh.addEventListener('click', fetchData);
+
+  // Deep link open by id (if later you switch to CPT endpoint, keep IDs stable)
+  function tryOpenById(){
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    if(!id) return;
+    const it = DATA.find(x => String(x.id)===String(id));
+    if(it) openLightbox(it);
+  }
+
+  fetchData().then(tryOpenById);
+  </script>
+</body>
+</html>

@@ -1,59 +1,68 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Archive of the Untamed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Shared terminal theme -->
+  <link rel="stylesheet" href="css/terminal.css" />
   <style>
-    body {
-      margin: 0;
-      padding: 40px;
-      background-color: #000;
-      color: #00FF00;
-      font-family: "Courier New", Courier, monospace;
-      font-size: 14px;
-    }
-    .light-mode {
-      background-color: #f4f4f4;
-      color: #111;
-    }
-    #terminal {
-      white-space: pre-wrap;
-      overflow-y: auto;
-      min-height: 80vh;
-    }
-    button, .toggle {
-      background: none;
-      color: inherit;
-      border: 1px solid #00FF00;
-      padding: 5px 10px;
-      font-family: monospace;
-      cursor: pointer;
-      margin-right: 10px;
-    }
-    #controls {
-      margin-top: 20px;
-    }
+    /* Page-specific tiny tweaks */
+    #terminal { white-space: pre-wrap; line-height: 1.3; }
+    #controls { display:flex; gap:8px; margin:12px 0; }
+    #controls button { border:1px solid var(--term-border); background:var(--term-ui-bg); color:var(--term-fg); padding:6px 10px; font-family:inherit; }
+    a.node { color: var(--term-fg); text-decoration: underline; }
   </style>
 </head>
 <body>
+  <header class="container">
+    <h1>ARCHIVE OF THE UNTAMED</h1>
+    <div class="toggle">
+      <span>theme</span>
+      <button id="themeBtn" aria-pressed="false">terminal</button>
+    </div>
+    <p class="sub">protocol://disorder.memory.network</p>
+  </header>
 
-<h1>> ARCHIVE OF THE UNTAMED</h1>
-<div id="terminal"></div>
+  <main class="container">
+    <div id="terminal"></div>
 
-<div id="controls">
-  <button onclick="toggleTheme()">[ toggle dark/light ]</button>
-  <button onclick="toggleAudio()">[ mute / unmute ]</button>
-</div>
+    <div id="controls">
+      <button id="themeToggleBtn" type="button">[ toggle dark/light ]</button>
+      <button id="audioBtn" type="button">[ unmute ]</button>
+    </div>
 
-<audio id="bg-audio" autoplay loop>
-  <source src="audio/soundscape.mp3" type="audio/mp3">
-  Your browser does not support the audio element.
-</audio>
+    <audio id="bg-audio" preload="auto" playsinline loop muted>
+      <source src="audio/soundscape.mp3" type="audio/mp3" />
+      Your browser does not support the audio element.
+    </audio>
+  </main>
 
-<script>
-  // Testo da scrivere nel terminale
-  const terminalText = `
+  <script>
+    // ================= THEME (same logic as archive)
+    const THEME_KEY = 'aotuTheme';
+    const themeBtn = document.getElementById('themeBtn');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+    function applyTheme(t) {
+      document.body.classList.toggle('light', t === 'light');
+      if (themeBtn) {
+        themeBtn.setAttribute('aria-pressed', String(t === 'light'));
+        themeBtn.textContent = t === 'light' ? 'light' : 'terminal';
+      }
+    }
+    function flipTheme() {
+      const cur = document.body.classList.contains('light') ? 'light' : 'terminal';
+      const next = cur === 'light' ? 'terminal' : 'light';
+      localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
+    }
+    applyTheme(localStorage.getItem(THEME_KEY) || 'terminal');
+    if (themeBtn) themeBtn.addEventListener('click', flipTheme);
+    if (themeToggleBtn) themeToggleBtn.addEventListener('click', flipTheme);
+
+    // ================= TYPEWRITER
+    const terminalText = `
 :: protocol://disorder.memory.network/init
 :: version 3.0
 
@@ -69,39 +78,81 @@
   as tools of resistance and reappropriation.
 
 > PLATFORM NODES:
-  - Abstract
-  - Manifesto
-  - Online Platform
-  - Hardware Treehouse
-  - Performative Logs
-  - Narrative Modes
-  - Editorial Dump
+  - Abstract                 -> abstract.html
+  - Manifesto                -> manifesto.html
+  - Online Platform          -> archive.html
+  - Hardware Treehouse       -> #hardware
+  - Performative Logs        -> #logs
+  - Narrative Modes          -> #narratives
+  - Editorial Dump           -> #dump
 
 > REPOSITORY: /archive-of-the-untamed/
 
 > END_OF_INDEX █`;
 
-  const terminal = document.getElementById("terminal");
-  let index = 0;
+    const terminal = document.getElementById('terminal');
+    let idx = 0;
+    (function typeWriter() {
+      if (idx < terminalText.length) {
+        terminal.textContent += terminalText.charAt(idx++);
+        setTimeout(typeWriter, 10);
+      } else {
+        // After typing finishes, convert node lines into links
+        linkifyNodes();
+      }
+    })();
 
-  function typeWriter() {
-    if (index < terminalText.length) {
-      terminal.innerHTML += terminalText.charAt(index);
-      index++;
-      setTimeout(typeWriter, 10);
+    function linkifyNodes() {
+      // Replace the "-> url" markers with real anchors
+      const map = {
+        'abstract.html': 'abstract.html',
+        'manifesto.html': 'manifesto.html',
+        'archive.html': 'archive.html',
+        '#hardware': '#hardware',
+        '#logs': '#logs',
+        '#narratives': '#narratives',
+        '#dump': '#dump'
+      };
+      let html = terminal.innerHTML
+        .replace(/-&nbsp;Abstract\\s*->\\s*abstract\\.html/g, '- <a class="node" href="abstract.html">Abstract</a>')
+        .replace(/-&nbsp;Manifesto\\s*->\\s*manifesto\\.html/g, '- <a class="node" href="manifesto.html">Manifesto</a>')
+        .replace(/-&nbsp;Online Platform\\s*->\\s*archive\\.html/g, '- <a class="node" href="archive.html">Online Platform</a>')
+        .replace(/-&nbsp;Hardware Treehouse\\s*->\\s*#hardware/g, '- <a class="node" href="#hardware">Hardware Treehouse</a>')
+        .replace(/-&nbsp;Performative Logs\\s*->\\s*#logs/g, '- <a class="node" href="#logs">Performative Logs</a>')
+        .replace(/-&nbsp;Narrative Modes\\s*->\\s*#narratives/g, '- <a class="node" href="#narratives">Narrative Modes</a>')
+        .replace(/-&nbsp;Editorial Dump\\s*->\\s*#dump/g, '- <a class="node" href="#dump">Editorial Dump</a>');
+      // In case the browser didn't convert spaces to &nbsp; in innerHTML, do a second pass with normal spaces:
+      html = html
+        .replace(/- Abstract\\s*->\\s*abstract\\.html/g, '- <a class="node" href="abstract.html">Abstract</a>')
+        .replace(/- Manifesto\\s*->\\s*manifesto\\.html/g, '- <a class="node" href="manifesto.html">Manifesto</a>')
+        .replace(/- Online Platform\\s*->\\s*archive\\.html/g, '- <a class="node" href="archive.html">Online Platform</a>')
+        .replace(/- Hardware Treehouse\\s*->\\s*#hardware/g, '- <a class="node" href="#hardware">Hardware Treehouse</a>')
+        .replace(/- Performative Logs\\s*->\\s*#logs/g, '- <a class="node" href="#logs">Performative Logs</a>')
+        .replace(/- Narrative Modes\\s*->\\s*#narratives/g, '- <a class="node" href="#narratives">Narrative Modes</a>')
+        .replace(/- Editorial Dump\\s*->\\s*#dump/g, '- <a class="node" href="#dump">Editorial Dump</a>');
+      terminal.innerHTML = html;
     }
-  }
-  typeWriter();
 
-  function toggleTheme() {
-    document.body.classList.toggle("light-mode");
-  }
+    // ================= AUDIO
+    const audio = document.getElementById('bg-audio');
+    const audioBtn = document.getElementById('audioBtn');
 
-  function toggleAudio() {
-    const audio = document.getElementById("bg-audio");
-    audio.muted = !audio.muted;
-  }
-</script>
-
+    function updateAudioBtnLabel() {
+      audioBtn.textContent = audio.muted ? '[ unmute ]' : '[ mute ]';
+    }
+    function toggleAudio() {
+      // try to play if previously blocked
+      if (audio.paused && audio.muted === false) {
+        audio.play().catch(() => {});
+      }
+      audio.muted = !audio.muted;
+      if (!audio.muted) {
+        audio.play().catch(() => {}); // re-attempt play after unmute
+      }
+      updateAudioBtnLabel();
+    }
+    audioBtn.addEventListener('click', toggleAudio);
+    updateAudioBtnLabel();
+  </script>
 </body>
 </html>

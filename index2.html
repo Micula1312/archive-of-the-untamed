@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Archive of the Untamed — Home</title>
+  <meta name="description" content="Archive of the Untamed — platform nodes" />
+  <style>
+    :root{
+      --bg0:#0D0D0D; /* nero lucido */
+      --bg1:#4B4B4B33; /* grigio cemento (alpha) */
+      --accent:#D62328; /* rosso segnaletico */
+      --mint:#8AE9B2; /* verde radiazione */
+      --paper:#ECECEC; /* bianco sporco */
+      --iris:#EAE5F4; /* perla madre */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--paper);
+      background:
+        radial-gradient(60vmax 60vmax at 10% 10%, #EAE5F40f, transparent 60%),
+        radial-gradient(50vmax 50vmax at 85% 15%, #8AE9B215, transparent 60%),
+        radial-gradient(70vmax 70vmax at 50% 100%, #D6232820, transparent 60%),
+        linear-gradient(180deg, #0D0D0D, #0D0D0D 60%, #111 100%);
+      background-attachment: fixed;
+    }
+    .wrap{min-height:100%; display:flex; flex-direction:column}
+    header{
+      padding:32px 20px 0; max-width:1100px; margin:0 auto;
+    }
+    .brand{display:flex; gap:12px; align-items:center}
+    .brand .dot{width:14px; height:14px; border-radius:50%; background:var(--accent); box-shadow:0 0 18px var(--accent)}
+    h1{margin:0; font-size:clamp(22px,4.2vw,46px); letter-spacing:0.5px}
+    p.tag{margin:6px 0 24px; opacity:.85}
+
+    main{flex:1; padding:20px; max-width:1100px; margin:0 auto}
+
+    .grid{display:grid; gap:14px; grid-template-columns:repeat(1,minmax(0,1fr))}
+    @media (min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (min-width:960px){.grid{grid-template-columns:repeat(3,1fr)}}
+
+    .card{position:relative; border:1px solid #ffffff14; border-radius:16px; padding:18px 16px; background:linear-gradient(180deg,#202020cc,#161616cc); backdrop-filter: blur(6px); box-shadow:0 10px 30px #0008; transition: transform .18s ease, box-shadow .18s ease, border-color .2s ease}
+    .card:hover{transform: translateY(-2px); box-shadow:0 14px 36px #000a; border-color:#ffffff26}
+    .card a{color:inherit; text-decoration:none; display:block}
+    .card h2{margin:0 0 8px; font-size:clamp(16px,2.4vw,20px)}
+    .card p{margin:0; font-size:14px; opacity:.9}
+
+    .chip{display:inline-flex; align-items:center; gap:8px; font-size:12px; letter-spacing:.3px; color:#fff; padding:6px 10px; border-radius:999px; background: linear-gradient(90deg, var(--accent), #ff6b6b); box-shadow:0 0 18px #d6232833 inset, 0 0 26px #d623281f}
+
+    footer{padding:24px 20px 40px; max-width:1100px; margin:0 auto; opacity:.8}
+    footer a{color:var(--mint)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <span class="dot" aria-hidden="true"></span>
+        <h1>Archive of the Untamed</h1>
+      </div>
+      <p class="tag">Platform nodes</p>
+      <span class="chip">AOTU · v0.1</span>
+    </header>
+
+    <main>
+      <section class="grid" aria-label="Platform nodes">
+        <article class="card">
+          <a href="abstract.html">
+            <h2>Abstract</h2>
+            <p>Project overview, scope and references.</p>
+          </a>
+        </article>
+        <article class="card">
+          <a href="manifesto.html">
+            <h2>Manifesto</h2>
+            <p>Cosmic aerofeminism, urban wildness, and methods.</p>
+          </a>
+        </article>
+        <article class="card">
+          <a href="#" onclick="alert('Coming soon: WordPress archive.'); return false;">
+            <h2>Online Platform</h2>
+            <p>Public, searchable archive (WordPress).</p>
+          </a>
+        </article>
+        <article class="card">
+          <a href="#hardware">
+            <h2>Hardware Treehouse</h2>
+            <p>Devices, field kits, and installation specs.</p>
+          </a>
+        </article>
+        <article class="card">
+          <a href="#logs">
+            <h2>Performative Logs</h2>
+            <p>Field notes, missions, scores, and recordings.</p>
+          </a>
+        </article>
+        <article class="card">
+          <a href="#narratives">
+            <h2>Narrative Modes</h2>
+            <p>Story engines, UI experiments, and generative tests.</p>
+          </a>
+        </article>
+        <article class="card">
+          <a href="#dump">
+            <h2>Editorial Dump</h2>
+            <p>Drafts, snippets, bibliographies, images.</p>
+          </a>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <small>© <span id="y"></span> AOTU. <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>.</small>
+    </footer>
+  </div>
+  <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+</body>
+</html>
